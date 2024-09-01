@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Ingresos y Gastos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Gestión de Ingresos y Gastos</h1>
+        </div>
+    </header>
+    <div class="container">
+        <div class="main">
+            <div class="form-group">
+                <label for="tipo">Tipo:</label>
+                <select id="tipo">
+                    <option value="ingreso">Ingreso</option>
+                    <option value="gasto">Gasto</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="fecha">Fecha (dd/mm/aaaa):</label>
+                <input type="text" id="fecha">
+            </div>
+            <div class="form-group">
+                <label for="monto">Monto:</label>
+                <input type="number" id="monto">
+            </div>
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion"></textarea>
+            </div>
+            <button class="btn" onclick="registrar()">Registrar</button>
+            <button class="btn" onclick="mostrarBalance()">Mostrar Balance</button>
+            <button class="btn" onclick="mostrarHistorial()">Mostrar Historial</button>
+            <div class="output" id="output"></div>
+        </div>
+    </div>
+    <script src="MoneyD.js"></script>
+</body>
+</html>
