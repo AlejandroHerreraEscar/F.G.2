@@ -3,16 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoneyD</title>
+    <title>Gestión de Ingresos y Gastos</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>MoneyD</h1>
+            <h1>Gestión de Ingresos y Gastos</h1>
         </div>
     </header>
-    <div class="container">
+
+    <!-- Formulario de Login -->
+    <div class="container" id="loginContainer">
+        <div class="form-group">
+            <label for="usuario">Usuario:</label>
+            <input type="text" id="usuario">
+        </div>
+        <button class="btn" onclick="login()">Iniciar Sesión</button>
+    </div>
+
+    <!-- Interfaz de la aplicación (oculta hasta el login) -->
+    <div class="container" id="mainApp" style="display: none;">
         <div class="main">
             <div class="form-group">
                 <label for="tipo">Tipo:</label>
@@ -39,6 +50,7 @@
             <div class="output" id="output"></div>
         </div>
     </div>
+
     <script src="MoneyD.js"></script>
 </body>
 </html>
