@@ -1,165 +1,172 @@
-class Ingreso {
-    constructor(dia, mes, anio, monto, descripcion) {
-        this.dia = dia;
-        this.mes = mes;
-        this.anio = anio;
-        this.monto = monto;
-        this.descripcion = descripcion;
-    }
-}
+const incomeInput = document.getElementById('monthly-income');
+const setIncomeBtn = document.getElementById('set-income-btn');
+const expenseAmountInput = document.getElementById('expense-amount');
+const expensePeriodSelect = document.getElementById('expense-period');
+const expenseCategorySelect = document.getElementById('expense-category');
+const addExpenseBtn = document.getElementById('add-expense-btn');
+const totalExpensesEl = document.getElementById('total-expenses');
+const balanceEl = document.getElementById('balance');
+const resetBtn = document.getElementById('reset-btn'); // Botón de reiniciar
 
-class Gasto {
-    constructor(dia, mes, anio, monto, descripcion) {
-        this.dia = dia;
-        this.mes = mes;
-        this.anio = anio;
-        this.monto = monto;
-        this.descripcion = descripcion;
-    }
-}
+let totalExpenses = 0;
+let monthlyIncome = 0;
 
-// Usuario actual que ha iniciado sesión
-let usuarioActual = null;
-
-// Cargar usuarios desde localStorage o inicializar un objeto vacío
-let usuarios = JSON.parse(localStorage.getItem('usuarios')) || {};
-
-function guardarUsuarios() {
-    localStorage.setItem('usuarios', JSON.stringify(usuarios));
-}
-
-function login() {
-    let usuario = document.getElementById('usuario').value;
-    
-    if (!usuario) {
-        alert('Por favor, ingrese un nombre de usuario.');
-        return;
-    }
-
-    // Verificar si el usuario ya existe
-    if (!usuarios[usuario]) {
-        // Si el usuario no existe, lo creamos y guardamos en localStorage
-        usuarios[usuario] = {
-            ingresos: [],
-            gastos: []
-        };
-        guardarUsuarios();
-        alert(`Nuevo usuario creado: ${usuario}`);
-    }
-
-    // Iniciar sesión con el usuario
-    usuarioActual = usuario;
-    document.getElementById('loginContainer').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    
-    // Mostrar el historial del usuario
-    mostrarHistorial();
-}
-
-function registrar() {
-    let tipo = document.getElementById('tipo').value;
-    let fecha = document.getElementById('fecha').value.split('/');
-    let dia = parseInt(fecha[0]);
-    let mes = parseInt(fecha[1]);
-    let anio = parseInt(fecha[2]);
-    let monto = parseFloat(document.getElementById('monto').value);
-    let descripcion = document.getElementById('descripcion').value;
-
-    if (usuarioActual === null) {
-        alert('Debe iniciar sesión antes de registrar un ingreso o gasto.');
-        return;
-    }
-
-    if (tipo === 'ingreso') {
-        let ingreso = new Ingreso(dia, mes, anio, monto, descripcion);
-        usuarios[usuarioActual].ingresos.push(ingreso);
+// Establecer ingresos
+setIncomeBtn.addEventListener('click', () => {
+    monthlyIncome = parseFloat(incomeInput.value);
+    if (!isNaN(monthlyIncome) && monthlyIncome > 0) {
+        alert(`Ingresos establecidos: $${monthlyIncome}`);
+        storeIncome(monthlyIncome); // Guardar ingresos en localStorage
+        updateBalance();
     } else {
-        let gasto = new Gasto(dia, mes, anio, monto, descripcion);
-        usuarios[usuarioActual].gastos.push(gasto);
+        alert('Por favor, ingrese un valor válido de ingresos.');
     }
+});
 
-    // Guardar el registro en localStorage
-    guardarUsuarios();
+// Agregar gasto
+addExpenseBtn.addEventListener('click', () => {
+    const amount = parseFloat(expenseAmountInput.value);
+    const period = expensePeriodSelect.value;
+    const category = expenseCategorySelect.value;
 
-    document.getElementById('fecha').value = '';
-    document.getElementById('monto').value = '';
-    document.getElementById('descripcion').value = '';
-}
+    if (!isNaN(amount) && amount > 0) {
+        let adjustedAmount = adjustExpense(amount, period);
+        totalExpenses += adjustedAmount;
 
-function mostrarBalance() {
-    if (usuarioActual === null) {
-        alert('Debe iniciar sesión para ver el balance.');
-        return;
+        // Guardar el gasto en localStorage
+        const newExpense = { amount, period, category };
+        storeExpense(newExpense);
+
+        updateExpenses();
+        updateBalance();
+        updateChart(); // Actualizamos el gráfico con los nuevos datos
+    } else {
+        alert('Ingrese un monto válido para el gasto.');
     }
+});
 
-    let balance = 0;
-    for (let ingreso of usuarios[usuarioActual].ingresos) {
-        balance += ingreso.monto;
-    }
-    for (let gasto of usuarios[usuarioActual].gastos) {
-        balance -= gasto.monto;
-    }
-    document.getElementById('output').innerText = 'Balance total: ' + balance;
-}
+// Reiniciar la aplicación
+resetBtn.addEventListener('click', () => {
+    totalExpenses = 0;
+    monthlyIncome = 0;
 
-function mostrarHistorial() {
-    if (usuarioActual === null) {
-        alert('Debe iniciar sesión para ver el historial.');
-        return;
-    }
-
-    // Crear el contenido para los ingresos
-    let ingresosOutput = '<h3>Ingresos</h3>';
-    ingresosOutput += `
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Monto</th>
-                    <th>Descripción</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-
-    for (let ingreso of usuarios[usuarioActual].ingresos) {
-        ingresosOutput += `
-            <tr>
-                <td>${ingreso.dia}/${ingreso.mes}/${ingreso.anio}</td>
-                <td>${ingreso.monto}</td>
-                <td>${ingreso.descripcion}</td>
-            </tr>
-        `;
-    }
+    // Limpiar los inputs
+    incomeInput.value = '';
+    expenseAmountInput.value = '';
+    expensePeriodSelect.value = 'monthly';
+    expenseCategorySelect.value = 'food';
     
-    ingresosOutput += '</tbody></table>';
+    // Borrar los datos almacenados
+    localStorage.removeItem('monthlyIncome');
+    localStorage.removeItem('expenses');
 
-    // Crear el contenido para los gastos
-    let gastosOutput = '<h3>Gastos</h3>';
-    gastosOutput += `
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Monto</th>
-                    <th>Descripción</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
+    // Actualizar la UI
+    updateExpenses();
+    updateBalance();
+    updateChart();
+    document.getElementById('recommendations').textContent = ''; // Limpiar recomendaciones
+});
 
-    for (let gasto of usuarios[usuarioActual].gastos) {
-        gastosOutput += `
-            <tr>
-                <td>${gasto.dia}/${gasto.mes}/${gasto.anio}</td>
-                <td>${gasto.monto}</td>
-                <td>${gasto.descripcion}</td>
-            </tr>
-        `;
+function adjustExpense(amount, period) {
+    if (period === 'daily') {
+        return amount * 30;  // Ajuste a mensual
+    } else if (period === 'annual') {
+        return amount / 12;  // Ajuste a mensual
+    }
+    return amount;  // Mensual
+}
+
+function updateExpenses() {
+    totalExpensesEl.textContent = `Gastos Totales: $${totalExpenses.toFixed(2)}`;
+}
+
+function updateBalance() {
+    const balance = monthlyIncome - totalExpenses;
+    balanceEl.textContent = `Balance: $${balance.toFixed(2)}`;
+    balanceEl.style.color = balance >= 0 ? 'green' : 'red';
+
+    // Mostrar recomendaciones si los gastos superan los ingresos
+    const recommendationsEl = document.getElementById('recommendations');
+    if (balance < 0) {
+        recommendationsEl.textContent = "Tus gastos están excediendo tus ingresos. Considera reducir gastos en algunas categorías.";
+    } else {
+        recommendationsEl.textContent = "";
+    }
+}
+
+// Guardar ingresos y gastos en localStorage
+function storeIncome(income) {
+    localStorage.setItem('monthlyIncome', income);
+}
+
+function storeExpense(expense) {
+    let expenses = getStoredExpenses();
+    expenses.push(expense);
+    localStorage.setItem('expenses', JSON.stringify(expenses));
+}
+
+function getStoredExpenses() {
+    return JSON.parse(localStorage.getItem('expenses')) || [];
+}
+
+// Actualizar el gráfico de gastos
+let chart; // Variable para almacenar el gráfico
+function updateChart() {
+    const ctx = document.getElementById('expenses-chart').getContext('2d');
+    
+    const categories = ['Alimentación', 'Transporte', 'Entretenimiento', 'Otros'];
+    const expensesByCategory = getExpensesByCategory();
+
+    if (chart) {
+        chart.destroy(); // Destruir el gráfico anterior para crear uno nuevo
     }
 
-    gastosOutput += '</tbody></table>';
-
-    // Mostrar los datos en el contenedor 'output'
-    document.getElementById('output').innerHTML = ingresosOutput + gastosOutput;
+    chart = new Chart(ctx, {
+        type: 'pie', 
+        data: {
+            labels: categories,
+            datasets: [{
+                label: 'Gastos por Categoría',
+                data: expensesByCategory,
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+            }]
+        },
+        options: {
+            responsive: true,
+        }
+    });
 }
+
+function getExpensesByCategory() {
+    const categories = ['food', 'transport', 'entertainment', 'other'];
+    const expenses = getStoredExpenses(); 
+    let totals = [0, 0, 0, 0]; 
+
+    expenses.forEach(expense => {
+        const index = categories.indexOf(expense.category);
+        if (index > -1) {
+            totals[index] += adjustExpense(expense.amount, expense.period);
+        }
+    });
+
+    return totals;
+}
+
+// Establecer ingresos cuando se cargue la página
+document.addEventListener('DOMContentLoaded', () => {
+    const storedIncome = localStorage.getItem('monthlyIncome');
+    if (storedIncome) {
+        monthlyIncome = parseFloat(storedIncome);
+        updateBalance();
+    }
+
+    const storedExpenses = getStoredExpenses();
+    storedExpenses.forEach(expense => {
+        totalExpenses += adjustExpense(expense.amount, expense.period);
+    });
+
+    updateExpenses();
+    updateChart();
+});
+
+

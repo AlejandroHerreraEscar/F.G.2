@@ -3,54 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Ingresos y Gastos</title>
+    <title>Calculadora de Ingresos y Gastos</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>Gestión de Ingresos y Gastos</h1>
-        </div>
-    </header>
+    <div class="container">
+        <h1>Calculadora de Ingresos y Gastos</h1>
 
-    <!-- Formulario de Login -->
-    <div class="container" id="loginContainer">
-        <div class="form-group">
-            <label for="usuario">Usuario:</label>
-            <input type="text" id="usuario">
+        <div class="income-section">
+            <h2>Ingresos Mensuales</h2>
+            <input type="number" id="monthly-income" placeholder="Ingresa tus ingresos mensuales">
+            <button id="set-income-btn">Establecer Ingresos</button>
         </div>
-        <button class="btn" onclick="login()">Iniciar Sesión</button>
+
+        <div class="expenses-section">
+            <h2>Registrar Gasto</h2>
+            <input type="number" id="expense-amount" placeholder="Monto del gasto">
+            <select id="expense-period">
+                <option value="daily">Diario</option>
+                <option value="monthly">Mensual</option>
+                <option value="annual">Anual</option>
+            </select>
+            <select id="expense-category">
+                <option value="food">Alimentación</option>
+                <option value="transport">Transporte</option>
+                <option value="entertainment">Entretenimiento</option>
+                <option value="other">Otros</option>
+            </select>
+            <button id="add-expense-btn">Agregar Gasto</button>
+            <button id="reset-btn">Reiniciar</button> <!-- Botón para reiniciar -->
+        </div>
+
+        <div class="summary-section">
+            <h2>Resumen</h2>
+            <p id="total-expenses">Gastos Totales: $0</p>
+            <p id="balance">Balance: $0</p>
+            <p id="recommendations"></p>
+            
+            <label for="filter-period">Ver gastos por período:</label>
+            <select id="filter-period">
+                <option value="all">Todos</option>
+                <option value="daily">Diario</option>
+                <option value="monthly">Mensual</option>
+                <option value="annual">Anual</option>
+            </select>
+        </div>
+
+        <canvas id="expenses-chart" width="400" height="400"></canvas>
     </div>
-
-    <!-- Interfaz de la aplicación (oculta hasta el login) -->
-    <div class="container" id="mainApp" style="display: none;">
-        <div class="main">
-            <div class="form-group">
-                <label for="tipo">Tipo:</label>
-                <select id="tipo">
-                    <option value="ingreso">Ingreso</option>
-                    <option value="gasto">Gasto</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="fecha">Fecha (dd/mm/aaaa):</label>
-                <input type="text" id="fecha">
-            </div>
-            <div class="form-group">
-                <label for="monto">Monto:</label>
-                <input type="number" id="monto">
-            </div>
-            <div class="form-group">
-                <label for="descripcion">Descripción:</label>
-                <textarea id="descripcion"></textarea>
-            </div>
-            <button class="btn" onclick="registrar()">Registrar</button>
-            <button class="btn" onclick="mostrarBalance()">Mostrar Balance</button>
-            <button class="btn" onclick="mostrarHistorial()">Mostrar Historial</button>
-            <div class="output" id="output"></div>
-        </div>
-    </div>
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="MoneyD.js"></script>
 </body>
 </html>
