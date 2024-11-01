@@ -1,50 +1,126 @@
+/* Estilos básicos */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    background-color: #f3f6f9;
     margin: 0;
-    padding: 20px; /* Añadir un padding alrededor de la página */
+    padding: 20px;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Cambiar para evitar problemas de centrado vertical */
-    min-height: 100vh; /* Cambiar height a min-height para permitir scroll */
+    align-items: flex-start;
+    min-height: 100vh;
+    color: #333;
 }
 
 .container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     max-width: 500px;
     width: 100%;
 }
 
 h1 {
     text-align: center;
-}
-
-.income-section, .expenses-section {
+    color: #0077cc;
+    font-size: 1.8em;
     margin-bottom: 20px;
 }
 
+h2 {
+    color: #555;
+    font-size: 1.4em;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 5px;
+}
+
+/* Estilos para inputs, selectores y botones */
 input, select, button {
     display: block;
     width: 100%;
     padding: 10px;
     margin: 10px 0;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 1em;
 }
 
+input::placeholder {
+    color: #aaa;
+}
+
+/* Efecto en botones */
 button {
-    background-color: #28a745;
+    background-color: #0077cc;
     color: white;
     cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: none;
 }
 
+button:hover {
+    background-color: #005fa3;
+}
+
+button:active {
+    background-color: #004080;
+}
+
+/* Selector de moneda */
+#currency-selector {
+    margin-top: 10px;
+    background-color: #f9f9f9;
+    color: #333;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    transition: border-color 0.2s ease;
+}
+
+#currency-selector:hover {
+    border-color: #0077cc;
+}
+
+/* Sección de resumen */
 .summary-section {
     text-align: center;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+    margin-top: 20px;
 }
 
+.summary-section p {
+    font-size: 1.2em;
+    color: #444;
+}
+
+/* Balance */
+#balance {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+/* Gráfico de gastos */
 #expenses-chart {
     margin-top: 20px;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Responsividad */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+    h1 {
+        font-size: 1.5em;
+    }
+    h2 {
+        font-size: 1.2em;
+    }
+    button, input, select {
+        font-size: 0.9em;
+    }
 }
