@@ -23,6 +23,32 @@ setIncomeBtn.addEventListener('click', () => {
     }
 });
 
+const currencySelector = document.getElementById('currency-selector');
+let exchangeRates = { CLP: 1, USD: 0.0013, EUR: 0.0011 }; // Valores iniciales (se actualizarán con la API)
+
+// Obtener las tasas de cambio desde la API
+async function fetchExchangeRates() {
+    try {
+        const response = await fetch(`https://v6.exchangerate-api.com/v6/fef6f22e3a3c9e1022bf9397/latest/USD`);
+        const data = await response.json();
+        exchangeRates = data.conversion_rates;
+        updateExpenses();
+        updateBalance();
+    } catch (error) {
+        console.error("Error al obtener las tasas de cambio:", error);
+    }
+}
+
+// Llamar a fetchExchangeRates cuando la página se carga
+document.addEventListener('DOMContentLoaded', () => {
+    fetchExchangeRates();
+});
+
+function convertCurrency(amount) {
+    const currency = currencySelector.value;
+    return amount * (exchangeRates[currency] || 1);
+}
+
 // Agregar gasto
 addExpenseBtn.addEventListener('click', () => {
     const amount = parseFloat(expenseAmountInput.value);
@@ -39,7 +65,7 @@ addExpenseBtn.addEventListener('click', () => {
 
         updateExpenses();
         updateBalance();
-        updateChart(); // Actualizamos el gráfico con los nuevos datos
+        updateChart(); // Actualizar el gráfico con los nuevos datos
     } else {
         alert('Ingrese un monto válido para el gasto.');
     }
@@ -77,22 +103,27 @@ function adjustExpense(amount, period) {
 }
 
 function updateExpenses() {
-    totalExpensesEl.textContent = `Gastos Totales: $${totalExpenses.toFixed(2)}`;
+    const convertedTotalExpenses = convertCurrency(totalExpenses);
+    totalExpensesEl.textContent = `Gastos Totales: ${currencySelector.value} ${convertedTotalExpenses.toFixed(2)}`;
 }
 
 function updateBalance() {
-    const balance = monthlyIncome - totalExpenses;
-    balanceEl.textContent = `Balance: $${balance.toFixed(2)}`;
-    balanceEl.style.color = balance >= 0 ? 'green' : 'red';
+    const convertedIncome = convertCurrency(monthlyIncome);
+    const convertedBalance = convertedIncome - convertCurrency(totalExpenses);
+    
+    balanceEl.textContent = `Balance: ${currencySelector.value} ${convertedBalance.toFixed(2)}`;
+    balanceEl.style.color = convertedBalance >= 0 ? 'green' : 'red';
 
-    // Mostrar recomendaciones si los gastos superan los ingresos
     const recommendationsEl = document.getElementById('recommendations');
-    if (balance < 0) {
-        recommendationsEl.textContent = "Tus gastos están excediendo tus ingresos. Considera reducir gastos en algunas categorías.";
-    } else {
-        recommendationsEl.textContent = "";
-    }
+    recommendationsEl.textContent = convertedBalance < 0 
+        ? "Tus gastos están excediendo tus ingresos. Considera reducir gastos en algunas categorías."
+        : "";
 }
+
+currencySelector.addEventListener('change', () => {
+    updateExpenses();
+    updateBalance();
+});
 
 // Guardar ingresos y gastos en localStorage
 function storeIncome(income) {
@@ -168,5 +199,4 @@ document.addEventListener('DOMContentLoaded', () => {
     updateExpenses();
     updateChart();
 });
-
 
