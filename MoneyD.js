@@ -11,6 +11,69 @@ const resetBtn = document.getElementById('reset-btn'); // Botón de reiniciar
 let totalExpenses = 0;
 let monthlyIncome = 0;
 
+require('dotenv').config();
+const sql = require('mssql');
+
+const dbConfig = {
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    server: process.env.DB_SERVER,
+    database: process.env.DB_DATABASE,
+    options: {
+        encrypt: true, // Si estás en Azure, usa esta opción
+        trustServerCertificate: true // Si es local
+    }
+};
+
+async function connectToDatabase() {
+    try {
+        await sql.connect(dbConfig);
+        console.log('Conectado a SQL Server');
+    } catch (error) {
+        console.error('Error conectando a SQL Server:', error);
+    }
+}
+
+connectToDatabase();
+
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+// Crear usuario
+app.post('/usuarios', async (req, res) => {
+    const { nombre, correo } = req.body;
+    try {
+        const result = await sql.query`INSERT INTO Usuarios (Nombre, Correo) VALUES (${nombre}, ${correo})`;
+        res.status(201).json({ message: 'Usuario creado', usuarioID: result.insertId });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al crear el usuario' });
+    }
+});
+
+// Crear boleta
+app.post('/boletas', async (req, res) => {
+    const { usuarioID, fecha, total, comercio } = req.body;
+    try {
+        await sql.query`INSERT INTO Boletas (UsuarioID, Fecha, Total, Comercio) VALUES (${usuarioID}, ${fecha}, ${total}, ${comercio})`;
+        res.status(201).json({ message: 'Boleta creada' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al crear la boleta' });
+    }
+});
+
+// Obtener boletas de un usuario
+app.get('/boletas/:usuarioID', async (req, res) => {
+    const { usuarioID } = req.params;
+    try {
+        const result = await sql.query`SELECT * FROM Boletas WHERE UsuarioID = ${usuarioID}`;
+        res.json(result.recordset);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener boletas' });
+    }
+});
+
+
 // Establecer ingresos
 setIncomeBtn.addEventListener('click', () => {
     monthlyIncome = parseFloat(incomeInput.value);
