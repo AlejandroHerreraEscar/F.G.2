@@ -73,6 +73,23 @@ app.get('/boletas/:usuarioID', async (req, res) => {
     }
 });
 
+async function agregarBoleta(boletaData) {
+    try {
+        const response = await fetch('http://localhost:3000/api/boletas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(boletaData)
+        });
+
+        const data = await response.json();
+        console.log(data.message); // Mensaje de confirmación
+    } catch (error) {
+        console.error('Error al enviar la boleta:', error);
+    }
+}
+
 
 // Establecer ingresos
 setIncomeBtn.addEventListener('click', () => {
