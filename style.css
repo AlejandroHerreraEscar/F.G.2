@@ -22,8 +22,8 @@ h1 {
     text-align: center;
 }
 
-.income-section, .expenses-section {
-    margin-bottom: 20px;
+.form-group {
+    margin-bottom: 15px;
 }
 
 input, select, button {
@@ -39,6 +39,11 @@ button {
     background-color: #28a745;
     color: white;
     cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #218838;
 }
 
 .summary-section {
@@ -46,5 +51,31 @@ button {
 }
 
 #expenses-chart {
+    margin-top: 20px;
+    width: 100%;
+    height: 300px;
+}
+
+#modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+#modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+}
+
+#close-modal-btn {
     margin-top: 20px;
 }
