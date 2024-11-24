@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Ingresos y Gastos</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -35,10 +35,14 @@
     <div class="form-group">
         <label for="expense-category">Categoría:</label>
         <select id="expense-category">
-            <option value="food">Alimentación</option>
-            <option value="transport">Transporte</option>
-            <option value="entertainment">Entretenimiento</option>
-            <option value="other">Otros</option>
+            <option value="Alimentación">Alimentación</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Entretenimiento">Entretenimiento</option>
+            <option value="Arriendo">Arriendo</option>
+            <option value="Impuestos">Impuestos</option>
+            <option value="Cuentas">Cuentas</option>
+            <option value="Deudas">Deudas</option>
+            <option value="Otros">Otros</option>
         </select>
     </div>
     <button id="add-expense-btn">Agregar Gasto</button>
@@ -77,7 +81,9 @@
     </div>
 </div>
 
+<button id="delete-months-btn">Borrar meses guardados</button>
 
-<script src="MoneyD.js"></script>
+<script src="MoneyD.js" defer></script>
 </body>
 </html>
+
