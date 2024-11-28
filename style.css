@@ -78,6 +78,13 @@ button:active {
     height: 300px;
 }
 
+.chart-container.large-chart {
+    width: 100%;
+    height: 600px;
+    margin-top: 20px;
+}
+
+
 #modal {
     position: fixed;
     top: 0;
@@ -159,4 +166,37 @@ ul li {
 
 .log-container .alert {
     margin-bottom: 10px;
+}
+
+.modal-message {
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-width: 300px;
+    margin: auto;
+    text-align: center;
+}
+
+.modal-message input[type="text"] {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.modal-message button {
+    margin-top: 20px;
+    background-color: #007bff;
+    color: white;
+}
+
+.modal-message button:hover {
+    background-color: #0056b3;
+}
+
+.modal-message button:active {
+    background-color: #004085;
 }

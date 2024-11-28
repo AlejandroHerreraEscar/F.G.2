@@ -195,19 +195,81 @@ saveDataBtn.addEventListener('click', () => {
 deleteMonthsBtn.addEventListener('click', () => {
     if (confirm('¿Está seguro de que desea borrar todos los meses guardados?')) {
         savedMonths = {};
+        localStorage.removeItem('budgetAppData'); // Borrar datos guardados del almacenamiento local
         saveData();
         logMessage('Todos los datos de los meses guardados han sido borrados.');
+
+        // Borrar el gráfico de comparación si existe
+        const comparisonChartEl = document.getElementById('comparison-chart');
+        if (comparisonChartEl) {
+            const comparisonCtx = comparisonChartEl.getContext('2d');
+            comparisonCtx.clearRect(0, 0, comparisonChartEl.width, comparisonChartEl.height);
+        }
     }
 });
 
-// Función de comparación (puedes añadir lógica específica según sea necesario)
+// Función de comparación de meses con gráficos
 compareDataBtn.addEventListener('click', () => {
     if (Object.keys(savedMonths).length > 1) {
-        let comparison = 'Comparación de Meses:\n';
-        for (const month in savedMonths) {
-            comparison += `${month}: Ingresos - $${savedMonths[month].income}, Gastos - $${savedMonths[month].expenses}\n`;
-        }
-        logMessage(comparison);
+        const labels = Object.keys(savedMonths);
+        const incomeData = labels.map(month => savedMonths[month].income);
+        const expenseData = labels.map(month => savedMonths[month].expenses);
+
+        const comparisonChartEl = document.getElementById('comparison-chart');
+        const comparisonCtx = comparisonChartEl.getContext('2d');
+        comparisonChartEl.width = comparisonChartEl.parentElement.clientWidth; // Ajustar el ancho
+        comparisonChartEl.height = comparisonChartEl.parentElement.clientHeight; // Ajustar la altura
+
+        new Chart(comparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Ingresos',
+                        data: incomeData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Gastos',
+                        data: expenseData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Determinar el mes con mayor gasto y mayor ahorro
+        let mesMayorGasto = labels[0];
+        let mesMayorAhorro = labels[0];
+        let mayorGasto = expenseData[0];
+        let mayorAhorro = incomeData[0] - expenseData[0];
+
+        labels.forEach((month, index) => {
+            if (expenseData[index] > mayorGasto) {
+                mayorGasto = expenseData[index];
+                mesMayorGasto = month;
+            }
+            const ahorro = incomeData[index] - expenseData[index];
+            if (ahorro > mayorAhorro) {
+                mayorAhorro = ahorro;
+                mesMayorAhorro = month;
+            }
+        });
+
+        logMessage(`El mes con mayor gasto fue ${mesMayorGasto} con $${mayorGasto}.`);
+        logMessage(`El mes con mayor ahorro fue ${mesMayorAhorro} con $${mayorAhorro}.`);
     } else {
         logMessage('Se necesita al menos dos meses de datos para comparar.');
     }
