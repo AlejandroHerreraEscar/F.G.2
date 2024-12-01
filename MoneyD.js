@@ -126,10 +126,19 @@ const categoryColors = {
 
 // Actualizar el gráfico
 function updateChart() {
-    expensesChart.data.labels = Object.keys(expenseCategories);
-    expensesChart.data.datasets[0].data = Object.values(expenseCategories);
-    expensesChart.data.datasets[0].backgroundColor = Object.keys(expenseCategories).map(category => categoryColors[category] || '#C9CBCF');
-    expensesChart.update();
+    const labels = Object.keys(expenseCategories);
+    const data = Object.values(expenseCategories);
+
+    if (labels.length > 0 && data.length > 0) {
+        expensesChart.data.labels = labels;
+        expensesChart.data.datasets[0].data = data;
+        expensesChart.data.datasets[0].backgroundColor = labels.map(
+            category => categoryColors[category] || '#C9CBCF'
+        );
+        expensesChart.update();
+    } else {
+        logMessage('No hay datos para mostrar en el gráfico.');
+    }
 }
 
 // Funciones para actualizar UI
@@ -156,19 +165,35 @@ function saveData() {
 // Mostrar y cerrar el modal
 viewMonthsBtn.addEventListener('click', () => {
     modal.style.display = 'flex';
-    monthsListEl.innerHTML = '';
-    Object.keys(savedMonths).forEach(month => {
-        const li = document.createElement('li');
-        li.textContent = `${month}: Ingresos - $${savedMonths[month].income}, Gastos - $${savedMonths[month].expenses}`;
-        monthsListEl.appendChild(li);
-    });
-    logMessage('Mostrando meses guardados.');
+    monthsListEl.innerHTML = ''; // Limpiar la lista de meses guardados
+
+    if (Object.keys(savedMonths).length > 0) {
+        Object.keys(savedMonths).forEach(month => {
+            const li = document.createElement('li');
+            li.textContent = `${month}: Ingresos - $${savedMonths[month].income}, Gastos - $${savedMonths[month].expenses}`;
+            
+            // Cargar datos del mes seleccionado
+            li.style.cursor = 'pointer';
+            li.addEventListener('click', () => {
+                loadMonthData(month); // Cargar datos del mes seleccionado
+            });
+
+            monthsListEl.appendChild(li);
+        });
+    } else {
+        monthsListEl.textContent = 'No hay meses guardados.';
+    }
+
+    logMessage('Modal de meses abierto.');
 });
 
+// Cerrar el modal
 closeModalBtn.addEventListener('click', () => {
     modal.style.display = 'none';
-    logMessage('Cerrando ventana de meses guardados.');
+    logMessage('Modal cerrado.');
 });
+
+// Función para manejar el gráfico de comparación
 
 // Guardar datos del mes
 saveDataBtn.addEventListener('click', () => {
@@ -179,7 +204,8 @@ saveDataBtn.addEventListener('click', () => {
         if (Object.keys(savedMonths).length < 12 || savedMonths.hasOwnProperty(month)) {
             savedMonths[month] = {
                 income: monthlyIncome,
-                expenses: totalExpenses
+                expenses: totalExpenses,
+                categoryExpenses: { ...expenseCategories } // Guardar gastos por categoría
             };
             logMessage(`Datos guardados para el mes de ${month}`);
             saveData();
@@ -190,6 +216,41 @@ saveDataBtn.addEventListener('click', () => {
         logMessage('Por favor, ingrese un mes válido.');
     }
 });
+
+
+function loadMonthData(month) {
+    if (savedMonths[month]) {
+        const monthData = savedMonths[month];
+
+        // Actualizar variables de estado
+        monthlyIncome = monthData.income;
+        totalExpenses = monthData.expenses;
+
+        // Reconstruir los datos de categorías para el gráfico
+        expenseCategories = {}; // Reiniciar las categorías
+        const categoryGastos = monthData.categoryExpenses || {}; // Gastos por categoría
+        Object.keys(categoryGastos).forEach(category => {
+            expenseCategories[category] = categoryGastos[category];
+        });
+
+        // Verificar si el gráfico necesita reinicialización
+        expensesChart.data.labels = [];
+        expensesChart.data.datasets[0].data = [];
+        expensesChart.data.datasets[0].backgroundColor = [];
+
+        // Actualizar la UI y el gráfico
+        updateExpenses();
+        updateBalance();
+        updateChart(); // Actualizar el gráfico con los nuevos datos
+
+        logMessage(`Datos del mes ${month} cargados correctamente.`);
+        modal.style.display = 'none'; // Cerrar el modal
+    } else {
+        logMessage('No se encontraron datos para el mes seleccionado.');
+    }
+}
+
+
 
 // Borrar datos de los meses guardados
 deleteMonthsBtn.addEventListener('click', () => {
@@ -209,6 +270,11 @@ deleteMonthsBtn.addEventListener('click', () => {
 });
 
 // Función de comparación de meses con gráficos
+// Variable para el gráfico de comparación
+let comparisonChart = null;
+
+// Función de comparación de meses con gráficos
+
 compareDataBtn.addEventListener('click', () => {
     if (Object.keys(savedMonths).length > 1) {
         const labels = Object.keys(savedMonths);
@@ -217,10 +283,15 @@ compareDataBtn.addEventListener('click', () => {
 
         const comparisonChartEl = document.getElementById('comparison-chart');
         const comparisonCtx = comparisonChartEl.getContext('2d');
-        comparisonChartEl.width = comparisonChartEl.parentElement.clientWidth; // Ajustar el ancho
-        comparisonChartEl.height = comparisonChartEl.parentElement.clientHeight; // Ajustar la altura
 
-        new Chart(comparisonCtx, {
+        // Reiniciar manualmente el canvas y destruir el gráfico existente si existe
+        comparisonCtx.clearRect(0, 0, comparisonChartEl.width, comparisonChartEl.height);
+        if (comparisonChart) {
+            comparisonChart.destroy();
+        }
+
+        // Crear nuevo gráfico
+        comparisonChart = new Chart(comparisonCtx, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -242,6 +313,8 @@ compareDataBtn.addEventListener('click', () => {
                 ]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         beginAtZero: true
@@ -268,8 +341,8 @@ compareDataBtn.addEventListener('click', () => {
             }
         });
 
-        logMessage(`El mes con mayor gasto fue ${mesMayorGasto} con $${mayorGasto}.`);
-        logMessage(`El mes con mayor ahorro fue ${mesMayorAhorro} con $${mayorAhorro}.`);
+        logMessage(`El mes con mayor gasto fue ${mesMayorGasto} con $${mayorGasto.toFixed(2)}.`);
+        logMessage(`El mes con mayor ahorro fue ${mesMayorAhorro} con $${mayorAhorro.toFixed(2)}.`);
     } else {
         logMessage('Se necesita al menos dos meses de datos para comparar.');
     }
@@ -282,9 +355,15 @@ resetBtn.addEventListener('click', () => {
     expenseCategories = {};
     incomeInput.value = '';
     expenseAmountInput.value = '';
+
+    // Limpiar el gráfico
+    expensesChart.data.labels = [];
+    expensesChart.data.datasets[0].data = [];
+    expensesChart.data.datasets[0].backgroundColor = [];
+    expensesChart.update();
+
     updateExpenses();
     updateBalance();
-    updateChart();
     saveData();
     logMessage('Datos reiniciados.');
 });
